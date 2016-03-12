@@ -34,7 +34,8 @@ static void update_time() {
 static void set_up_logo(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   
-  window_set_background_color(window, GColorFromRGBA(155, 171, 182, 1));
+  window_set_background_color(window, PBL_IF_ROUND_ELSE(GColorFromRGBA(155, 171, 182, 1),
+                                                        GColorWhite));
   
   s_logo_bitmap = gbitmap_create_with_resource(RESOURCE_ID_LOGO_PNG);  
   s_logo_bitmap_layer = bitmap_layer_create(GRect(0, 0, 180, 180));
@@ -48,26 +49,30 @@ static void set_up_logo(Window *window) {
 static void put_football_in_starting_position() {
   rot_bitmap_layer_set_angle(s_football_bitmap_layer, UPWARDS_ANGLE);
   GRect r = layer_get_frame((Layer *) s_football_bitmap_layer);
-  r.origin.x = -15;
-  r.origin.y = 145;
+  #if defined(PBL_ROUND)
+    r.origin.x = -15;
+    r.origin.y = 145;
+  #else
+    r.origin.x = -35;
+    r.origin.y = 155;
+  #endif
   layer_set_frame((Layer *) s_football_bitmap_layer, r);
 }
 
-static void set_up_football(Window *window) {
-  GRect r;
+static void set_up_football(Layer *window_layer) {
   s_football_bitmap = gbitmap_create_with_resource(RESOURCE_ID_FOOTBALL_PNG);
   s_football_bitmap_layer = rot_bitmap_layer_create(s_football_bitmap);
   rot_bitmap_set_compositing_mode(s_football_bitmap_layer, GCompOpSet);
   
   put_football_in_starting_position();
   
-  r = layer_get_frame((Layer *) s_football_bitmap_layer);
-  r.origin.x = 65;
+  GRect bounds = layer_get_bounds(window_layer);
+  GRect r = layer_get_frame((Layer *) s_football_bitmap_layer);
+  r.origin.x = (bounds.size.w / 2) - 25;
   r.origin.y = 60;
   s_football_end_position = r;
     
-  layer_add_child(window_get_root_layer(window),
-                  (Layer *) s_football_bitmap_layer);
+  layer_add_child(window_layer, (Layer *) s_football_bitmap_layer);
 }
 
 static void main_window_load(Window *window) {
@@ -76,7 +81,7 @@ static void main_window_load(Window *window) {
   GRect bounds = layer_get_bounds(window_layer);
   
   set_up_logo(window);
-  set_up_football(window);
+  set_up_football(window_layer);
   
   // Create GFont
   s_time_font = fonts_get_system_font(FONT_KEY_LECO_38_BOLD_NUMBERS);
