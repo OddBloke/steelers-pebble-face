@@ -1,0 +1,33 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "Daniel Watkins",
+    "enableMultiJS": true,
+    "longName": "Steelers Watchface",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/logo.png",
+                "name": "LOGO_PNG",
+                "targetPlatforms": [
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "Steelers Watchface",
+    "targetPlatforms": [
+        "chalk"
+    ],
+    "uuid": "5b428626-8a3a-43a0-8603-a6bd3efbd8a3",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
