@@ -10,6 +10,15 @@
     "resources": {
         "media": [
             {
+                "file": "images/football.png",
+                "name": "FOOTBALL_PNG",
+                "targetPlatforms": [
+                    "basalt",
+                    "chalk"
+                ],
+                "type": "bitmap"
+            },
+            {
                 "file": "images/logo.png",
                 "name": "LOGO_PNG",
                 "targetPlatforms": [
@@ -26,7 +35,7 @@
         "chalk"
     ],
     "uuid": "5b428626-8a3a-43a0-8603-a6bd3efbd8a3",
-    "versionLabel": "1.0",
+    "versionLabel": "2.0",
     "watchapp": {
         "watchface": true
     }

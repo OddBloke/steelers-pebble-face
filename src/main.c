@@ -1,11 +1,18 @@
 #include <pebble.h>
 #include "main.h"
 
+const int DROPPING_ANGLE = 16384;  // Rotate by 270 degrees
+const int UPWARDS_ANGLE = 24576;  // Rotate by 135 degrees
+
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 
 static GBitmap *s_logo_bitmap;
 static BitmapLayer *s_logo_bitmap_layer;
+
+static GBitmap *s_football_bitmap;
+static RotBitmapLayer *s_football_bitmap_layer;
+static GRect s_football_end_position;
 
 static GFont s_time_font;
 
@@ -38,12 +45,38 @@ static void set_up_logo(Window *window) {
   layer_add_child(window_layer, bitmap_layer_get_layer(s_logo_bitmap_layer));
 }
 
+static void put_football_in_starting_position() {
+  rot_bitmap_layer_set_angle(s_football_bitmap_layer, UPWARDS_ANGLE);
+  GRect r = layer_get_frame((Layer *) s_football_bitmap_layer);
+  r.origin.x = -20;
+  r.origin.y = 140;
+  layer_set_frame((Layer *) s_football_bitmap_layer, r);
+}
+
+static void set_up_football(Window *window) {
+  GRect r;
+  s_football_bitmap = gbitmap_create_with_resource(RESOURCE_ID_FOOTBALL_PNG);
+  s_football_bitmap_layer = rot_bitmap_layer_create(s_football_bitmap);
+  rot_bitmap_set_compositing_mode(s_football_bitmap_layer, GCompOpSet);
+  
+  put_football_in_starting_position();
+  
+  r = layer_get_frame((Layer *) s_football_bitmap_layer);
+  r.origin.x = 60;
+  r.origin.y = 55;
+  s_football_end_position = r;
+    
+  layer_add_child(window_get_root_layer(window),
+                  (Layer *) s_football_bitmap_layer);
+}
+
 static void main_window_load(Window *window) {
   // Get information about the Window
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
   
   set_up_logo(window);
+  set_up_football(window);
   
   // Create GFont
   s_time_font = fonts_get_system_font(FONT_KEY_LECO_38_BOLD_NUMBERS);
@@ -66,14 +99,71 @@ static void main_window_load(Window *window) {
 static void main_window_unload(Window *window) {
   // Destroy TextLayer
   text_layer_destroy(s_time_layer);
-  fonts_unload_custom_font(s_time_font);
   
   gbitmap_destroy(s_logo_bitmap);
   bitmap_layer_destroy(s_logo_bitmap_layer);
+  
+  gbitmap_destroy(s_football_bitmap);
+  rot_bitmap_layer_destroy(s_football_bitmap_layer);
+}
+
+static void football_reached_ground_handler(Animation *animation, bool finished, void *context) {
+  put_football_in_starting_position();
+}
+
+static void animate_football_to_ground() {
+  rot_bitmap_layer_set_angle(s_football_bitmap_layer, DROPPING_ANGLE);
+  GRect r = layer_get_frame((Layer *) s_football_bitmap_layer);
+  r.origin.x += 5;  // We rotate around the center of the football, so this looks more natural
+  PropertyAnimation *prop_anim = property_animation_create_layer_frame(
+    (Layer *) s_football_bitmap_layer, &r, &GRect(r.origin.x, 180, r.size.w, r.size.h));
+  
+  // Get the Animation
+  Animation *anim = property_animation_get_animation(prop_anim);
+  
+  // Configure the Animation's curve, delay, and duration
+  animation_set_curve(anim, AnimationCurveLinear);
+  animation_set_delay(anim, 0);
+  animation_set_duration(anim, 750);
+  
+  animation_set_handlers(anim, (AnimationHandlers) {
+    .stopped = football_reached_ground_handler
+  }, NULL);
+  
+  // Play the animation
+  animation_schedule(anim);
+
+}
+
+static void football_reached_clock_handler(Animation *animation, bool finished, void *context) {
+  update_time();
+  animate_football_to_ground();
+}
+
+static void animate_football_to_clock() {
+  GRect r = layer_get_frame((Layer *) s_football_bitmap_layer);
+  PropertyAnimation *prop_anim = property_animation_create_layer_frame(
+    (Layer *) s_football_bitmap_layer,
+    &r,
+    &s_football_end_position);
+  // Get the Animation
+  Animation *anim = property_animation_get_animation(prop_anim);
+  
+  // Configure the Animation's curve, delay, and duration
+  animation_set_curve(anim, AnimationCurveEaseIn);
+  animation_set_delay(anim, 0);
+  animation_set_duration(anim, 750);
+  
+  animation_set_handlers(anim, (AnimationHandlers) {
+    .stopped = football_reached_clock_handler
+  }, NULL);
+  
+  // Play the animation
+  animation_schedule(anim);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  update_time();
+  animate_football_to_clock();
 }
 
 static void init() {
