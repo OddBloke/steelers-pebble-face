@@ -48,8 +48,8 @@ static void set_up_logo(Window *window) {
 static void put_football_in_starting_position() {
   rot_bitmap_layer_set_angle(s_football_bitmap_layer, UPWARDS_ANGLE);
   GRect r = layer_get_frame((Layer *) s_football_bitmap_layer);
-  r.origin.x = -20;
-  r.origin.y = 140;
+  r.origin.x = -15;
+  r.origin.y = 145;
   layer_set_frame((Layer *) s_football_bitmap_layer, r);
 }
 
@@ -62,8 +62,8 @@ static void set_up_football(Window *window) {
   put_football_in_starting_position();
   
   r = layer_get_frame((Layer *) s_football_bitmap_layer);
-  r.origin.x = 60;
-  r.origin.y = 55;
+  r.origin.x = 65;
+  r.origin.y = 60;
   s_football_end_position = r;
     
   layer_add_child(window_get_root_layer(window),
@@ -83,7 +83,7 @@ static void main_window_load(Window *window) {
 
   // Create the TextLayer with specific bounds
   s_time_layer = text_layer_create(
-      GRect(0, PBL_IF_ROUND_ELSE(18, 12), bounds.size.w, 50));
+      GRect(2, PBL_IF_ROUND_ELSE(23, 17), bounds.size.w, 50));
 
   // Improve the layout to be more like a watchface
   text_layer_set_background_color(s_time_layer, GColorClear);
@@ -112,9 +112,11 @@ static void football_reached_ground_handler(Animation *animation, bool finished,
 }
 
 static void animate_football_to_ground() {
-  rot_bitmap_layer_set_angle(s_football_bitmap_layer, DROPPING_ANGLE);
   GRect r = layer_get_frame((Layer *) s_football_bitmap_layer);
-  r.origin.x += 5;  // We rotate around the center of the football, so this looks more natural
+  r.origin.x += 5;
+  
+  rot_bitmap_layer_set_angle(s_football_bitmap_layer, DROPPING_ANGLE);
+  layer_set_frame((Layer *) s_football_bitmap_layer, r);
   PropertyAnimation *prop_anim = property_animation_create_layer_frame(
     (Layer *) s_football_bitmap_layer, &r, &GRect(r.origin.x, 180, r.size.w, r.size.h));
   
@@ -129,10 +131,9 @@ static void animate_football_to_ground() {
   animation_set_handlers(anim, (AnimationHandlers) {
     .stopped = football_reached_ground_handler
   }, NULL);
-  
+
   // Play the animation
   animation_schedule(anim);
-
 }
 
 static void football_reached_clock_handler(Animation *animation, bool finished, void *context) {
