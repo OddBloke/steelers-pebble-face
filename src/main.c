@@ -6,6 +6,9 @@ const int UPWARDS_ANGLE = 24576;  // Rotate by 135 degrees
 
 static Window *s_main_window;
 static TextLayer *s_time_layer;
+#if defined(PBL_ROUND)
+  static TextLayer *s_date_layer;
+#endif
 
 static GBitmap *s_logo_bitmap;
 static BitmapLayer *s_logo_bitmap_layer;
@@ -14,10 +17,8 @@ static GBitmap *s_football_bitmap;
 static RotBitmapLayer *s_football_bitmap_layer;
 static GRect s_football_end_position;
 
-static GFont s_time_font;
 
-
-static void update_time() {
+static void update_time_and_date() {
   // Get a tm structure
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
@@ -26,9 +27,15 @@ static void update_time() {
   static char s_buffer[8];
   strftime(s_buffer, sizeof(s_buffer), clock_is_24h_style() ?
                                           "%H:%M" : "%I:%M", tick_time);
-
+  
   // Display this time on the TextLayer
   text_layer_set_text(s_time_layer, s_buffer);
+  
+  #if defined(PBL_ROUND)
+    static char s_date_buffer[3];
+    strftime(s_date_buffer, sizeof(s_date_buffer), "%d", tick_time);
+    text_layer_set_text(s_date_layer, s_date_buffer);
+  #endif
 }
 
 static void set_up_logo(Window *window) {
@@ -75,17 +82,9 @@ static void set_up_football(Layer *window_layer) {
   layer_add_child(window_layer, (Layer *) s_football_bitmap_layer);
 }
 
-static void main_window_load(Window *window) {
-  // Get information about the Window
-  Layer *window_layer = window_get_root_layer(window);
+static void set_up_clock(Layer *window_layer) {
   GRect bounds = layer_get_bounds(window_layer);
   
-  set_up_logo(window);
-  set_up_football(window_layer);
-  
-  // Create GFont
-  s_time_font = fonts_get_system_font(FONT_KEY_LECO_38_BOLD_NUMBERS);
-
   // Create the TextLayer with specific bounds
   s_time_layer = text_layer_create(
       GRect(2, PBL_IF_ROUND_ELSE(23, 17), bounds.size.w, 50));
@@ -94,16 +93,45 @@ static void main_window_load(Window *window) {
   text_layer_set_background_color(s_time_layer, GColorClear);
   text_layer_set_text_color(s_time_layer, GColorBlack);
   text_layer_set_text(s_time_layer, "00:00");
-  text_layer_set_font(s_time_layer, s_time_font);
+  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_LECO_38_BOLD_NUMBERS));
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
   
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
 }
 
+#if defined(PBL_ROUND)
+static void set_up_date(Layer *window_layer) {
+  s_date_layer = text_layer_create(GRect(113, 77, 30, 30));
+  
+  text_layer_set_background_color(s_date_layer, GColorClear);
+  text_layer_set_text_color(s_date_layer, GColorMelon);
+  text_layer_set_text(s_date_layer, "00");
+  text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_LECO_20_BOLD_NUMBERS));
+  text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
+  
+  // Add it as a child layer to the Window's root layer
+  layer_add_child(window_layer, text_layer_get_layer(s_date_layer));
+}
+#endif
+
+static void main_window_load(Window *window) {
+  // Get information about the Window
+  Layer *window_layer = window_get_root_layer(window);
+  
+  set_up_logo(window);
+  set_up_football(window_layer);
+  set_up_clock(window_layer);
+  #if defined(PBL_ROUND)
+    set_up_date(window_layer);
+  #endif
+}
+
 static void main_window_unload(Window *window) {
-  // Destroy TextLayer
   text_layer_destroy(s_time_layer);
+  #if defined(PBL_ROUND)
+    text_layer_destroy(s_date_layer);
+  #endif
   
   gbitmap_destroy(s_logo_bitmap);
   bitmap_layer_destroy(s_logo_bitmap_layer);
@@ -142,7 +170,7 @@ static void animate_football_to_ground() {
 }
 
 static void football_reached_clock_handler(Animation *animation, bool finished, void *context) {
-  update_time();
+  update_time_and_date();
   animate_football_to_ground();
 }
 
@@ -186,7 +214,7 @@ static void init() {
   window_stack_push(s_main_window, true);
   
   // Make sure the time is displayed from the start
-  update_time();
+  update_time_and_date();
   
   // Register with TickTimerService
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
