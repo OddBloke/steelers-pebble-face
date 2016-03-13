@@ -8,6 +8,7 @@ static Window *s_main_window;
 static TextLayer *s_time_layer;
 #if defined(PBL_ROUND)
   static TextLayer *s_date_layer;
+  static TextLayer *s_day_of_week_layer;
 #endif
 
 static GBitmap *s_logo_bitmap;
@@ -35,6 +36,10 @@ static void update_time_and_date() {
     static char s_date_buffer[3];
     strftime(s_date_buffer, sizeof(s_date_buffer), "%d", tick_time);
     text_layer_set_text(s_date_layer, s_date_buffer);
+  
+    static char s_day_of_week_buffer[10];
+    strftime(s_day_of_week_buffer, sizeof(s_day_of_week_buffer), "%A", tick_time);
+    text_layer_set_text(s_day_of_week_layer, s_day_of_week_buffer);
   #endif
 }
 
@@ -113,6 +118,19 @@ static void set_up_date(Layer *window_layer) {
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_layer, text_layer_get_layer(s_date_layer));
 }
+
+static void set_up_day_of_week(Layer *window_layer) {
+  s_day_of_week_layer = text_layer_create(GRect(22, 95, 100, 30));
+  
+  text_layer_set_background_color(s_day_of_week_layer, GColorClear);
+  text_layer_set_text_color(s_day_of_week_layer, GColorBlack);
+  text_layer_set_text(s_day_of_week_layer, "Wednesday");
+  text_layer_set_font(s_day_of_week_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  text_layer_set_text_alignment(s_day_of_week_layer, GTextAlignmentLeft);
+  
+  // Add it as a child layer to the Window's root layer
+  layer_add_child(window_layer, text_layer_get_layer(s_day_of_week_layer));
+}
 #endif
 
 static void main_window_load(Window *window) {
@@ -124,6 +142,7 @@ static void main_window_load(Window *window) {
   set_up_clock(window_layer);
   #if defined(PBL_ROUND)
     set_up_date(window_layer);
+    set_up_day_of_week(window_layer);
   #endif
 }
 
