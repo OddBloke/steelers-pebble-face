@@ -1,16 +1,27 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
   </head>
   <body>
-    <h1>Steelers Watchface Configuration</h1>
+    <div class="container-fluid">
+      <h2>Steelers Watchface</h2>
 
-    <label>
-      Enable Animation
-      <input id="AppKeyAnimations" type="checkbox" />
-    </label>
+      <form class="form-horizontal">
+        <div class="form-group">
+          <label for="AppKeyAnimations" class="control-label col-sm-2">Enable animations</label>
+          <input id="AppKeyAnimations" type="checkbox" />
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+            <input class="btn btn-default" id="submit_button" type="button" value="Done" />
+          </div>
+      </form>
 
-    <input id="submit_button" type="button" value="Done" />
+    </div>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
   </body>
   <script>
     // Get a handle to the button's HTML element
