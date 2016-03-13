@@ -3,8 +3,30 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      .my-container:after {
+        content: ' ';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -999999;
+        opacity: 0.6;
+        display: block;
+        background-image: url("img/logo.png");
+        background-repeat: no-repeat;
+        -ms-background-size: 180%;
+        -o-background-size: 180%;
+        -moz-background-size: 180%;
+        -webkit-background-size: 180%;
+        background-size: 180%;
+      }
+    </style>
   </head>
   <body>
+    <div class="my-container">
     <div class="container-fluid">
       <h2>Steelers Watchface</h2>
 
@@ -19,6 +41,7 @@
           </div>
       </form>
 
+    </div>
     </div>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
