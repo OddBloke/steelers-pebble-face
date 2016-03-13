@@ -268,10 +268,10 @@ static void init() {
   update_time_and_date();
   
   fetch_and_set_config_options();
-  
+
   // Register with TickTimerService
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-  
+
   // Largest expected inbox and outbox message sizes
   const uint32_t inbox_size = 54;
   const uint32_t outbox_size = 0;
