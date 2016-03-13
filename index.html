@@ -20,7 +20,7 @@
 
     // Make a data object to be sent, coercing value types to integers
     var options = {
-      'animations': animationsCheckbox.checked == 'true' ? 1 : 0
+      'animations': animationsCheckbox.checked ? 1 : 0
     };
 
     // Determine the correct return URL (emulator vs real watch)
