@@ -1,7 +1,9 @@
 {
-    "appKeys": {},
+    "appKeys": {
+        "AppKeyAnimations": 0
+    },
     "capabilities": [
-        ""
+        "configurable"
     ],
     "companyName": "Daniel Watkins",
     "enableMultiJS": true,

@@ -1,6 +1,11 @@
 #include <pebble.h>
 #include "main.h"
 
+// Matching values to those in 'Settings'
+typedef enum {
+  AppKeyAnimations = 0
+} AppKey;
+
 const int DROPPING_ANGLE = 16384;  // Rotate by 270 degrees
 const int UPWARDS_ANGLE = 24576;  // Rotate by 135 degrees
 
@@ -17,6 +22,8 @@ static BitmapLayer *s_logo_bitmap_layer;
 static GBitmap *s_football_bitmap;
 static RotBitmapLayer *s_football_bitmap_layer;
 static GRect s_football_end_position;
+
+static bool show_animations;
 
 
 static void update_time_and_date() {
@@ -217,7 +224,31 @@ static void animate_football_to_clock() {
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  animate_football_to_clock();
+  if (show_animations) {
+    animate_football_to_clock();
+  } else {
+    update_time_and_date();
+  }
+}
+
+static void persist_configuration() {
+  persist_write_bool(AppKeyAnimations, show_animations);
+}
+
+static void inbox_received_callback(DictionaryIterator *iter, void *context) {
+  Tuple *animations_t = dict_find(iter, AppKeyAnimations);
+  if(animations_t) {
+    show_animations = animations_t->value->int32 == 1;
+  }
+  persist_configuration();
+};
+
+static void fetch_and_set_config_options() {
+  if (persist_exists(AppKeyAnimations)) {
+    show_animations = persist_read_bool(AppKeyAnimations);
+  } else {
+    show_animations = true;
+  }
 }
 
 static void init() {
@@ -236,8 +267,19 @@ static void init() {
   // Make sure the time is displayed from the start
   update_time_and_date();
   
+  fetch_and_set_config_options();
+  
   // Register with TickTimerService
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  
+  // Largest expected inbox and outbox message sizes
+  const uint32_t inbox_size = 54;
+  const uint32_t outbox_size = 0;
+
+  // Open AppMessage
+  app_message_open(inbox_size, outbox_size);
+  // Register to be notified about inbox received events
+  app_message_register_inbox_received(inbox_received_callback);
 }
 
 static void deinit() {
