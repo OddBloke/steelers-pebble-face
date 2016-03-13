@@ -150,6 +150,7 @@ static void main_window_unload(Window *window) {
   text_layer_destroy(s_time_layer);
   #if defined(PBL_ROUND)
     text_layer_destroy(s_date_layer);
+    text_layer_destroy(s_day_of_week_layer);
   #endif
   
   gbitmap_destroy(s_logo_bitmap);
